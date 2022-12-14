@@ -207,4 +207,5 @@ if __name__ == '__main__':
     main_sar(args)
 
 # execute on command line to access tensorboard interface
-# tensorboard --logir=runs
+# change exp000% each time 
+# tensorboard --logdir=/home/niklas/Documents/CNNlight_Experiments/exp0005/train/
