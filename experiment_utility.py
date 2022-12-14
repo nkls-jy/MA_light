@@ -91,15 +91,32 @@ def train_epoch(experiment, trainloader, data_preprocessing, log_data):
             del target_int
 
         pred = experiment.net(noisy)
+        
+        #print(f"pred shape: {pred.shape}")
+        #print(f"target shape: {target.shape}")
 
-        pad_row = (target.shape[1] - pred.shape[1])//2
-        pad_col = (target.shape[2] - pred.shape[2])//2
+        #pad_row = (target.shape[1] - pred.shape[1])//2
+        #pad_col = (target.shape[2] - pred.shape[2])//2
+
+        # new:
+        pad_row = (target.shape[2] - pred.shape[2]) // 2
+        pad_col = (target.shape[3] - pred.shape[3]) // 2
+
         if pad_row > 0:
+            # old:
+            #target = target[:, pad_row: -pad_row, :]
+            #target_amp = target_amp[:, pad_row: -pad_row, :]
+            # new:
             target = target[:, :, pad_row: -pad_row, :]
             target_amp = target_amp[:, :, pad_row: -pad_row, :]
         if pad_col > 0:
-            target = target[:, :, :, pad_col: -pad_col] #.contiguous()
-            target_amp = target_amp[:, :, :, pad_col: -pad_col] #.contiguous()
+            # old:
+            #target = target[:, :, pad_col: -pad_col]  # .contiguous()
+            #target_amp = target_amp[:, :, pad_col: -pad_col]  # .contiguous()
+            # new:
+            target = target[:, :, :, pad_col: -pad_col]
+            target_amp = target_amp[:, :, :, pad_col: -pad_col]
+
 
         loss = experiment.criterion(pred, target).mean()
 

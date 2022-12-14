@@ -20,15 +20,12 @@ class Experiment:
         self.expdir = os.path.join(basedir, self.expname)
 
     def create_network(self):
-        n3block_opt = dict(**self.args.n3block)
         type = self.args.backnet
         sizearea = self.args.sizearea
-        print(type, sizearea, n3block_opt)
         network_weights = NlmCNN.make_backnet(1, 
                                             type=type,  # default = 0 for base CNN
                                             sizearea=sizearea, 
                                             bn_momentum=0.1, 
-                                            n3block_opt=n3block_opt, 
                                             padding=False)
         net = NlmCNN.NlmCNN(network_weights, sizearea=sizearea, sar_data = True, padding=False)
         return net
@@ -120,31 +117,34 @@ def get_patchsize(patchsize, backnet):
     else:
         return 48
 
-def main_sync_sar(args):
+def main_sar(args):
+    print(f"args: {args}")
     exp_basedir = args.exp_basedir % args.backnet if '%d' in args.exp_basedir else args.exp_basedir
     patchsize = get_patchsize(args.patchsize, args.backnet)
+    
+    print(f"args.weights: {args.weights}")
 
     if args.weights:
         from experiment_utility import load_checkpoint, test_list_weights
-        from dataset.folders_data import list_test_10synt as listfile_test
-        listfile_test = [x for x in listfile_test if x[0][-3:] == '_04']
+        #from dataset.folders_data import list_test_10synt as listfile_test
+        #listfile_test = [x for x in listfile_test if x[0][-3:] == '_04']
 
-        assert (args.exp_name is not None)
-        experiment = Experiment(exp_basedir, args.exp_name)
-        experiment.setup(use_gpu=args.use_gpu)
-        load_checkpoint(experiment, args.eval_epoch)
-        outdir = os.path.join(experiment.expdir, "weights%03d" % args.eval_epoch)
-        test_list_weights(experiment, outdir, listfile_test, pad=18)
+        #assert (args.exp_name is not None)
+        #experiment = Experiment(exp_basedir, args.exp_name)
+        #experiment.setup(use_gpu=args.use_gpu)
+        #load_checkpoint(experiment, args.eval_epoch)
+        #outdir = os.path.join(experiment.expdir, "weights%03d" % args.eval_epoch)
+        #test_list_weights(experiment, outdir, listfile_test, pad=18)
     elif args.eval:
         from experiment_utility import load_checkpoint, test_list
-        from dataset.folders_data import list_test_10synt as listfile_test
+        #from dataset.folders_data import list_test_10synt as listfile_test
 
-        assert(args.exp_name is not None)
-        experiment = Experiment(exp_basedir, args.exp_name)
-        experiment.setup(use_gpu=args.use_gpu)
-        load_checkpoint(experiment, args.eval_epoch)
-        outdir = os.path.join(experiment.expdir, "results%03d" % args.eval_epoch)
-        test_list(experiment, outdir, listfile_test, pad=18)
+        #assert(args.exp_name is not None)
+        #experiment = Experiment(exp_basedir, args.exp_name)
+        #experiment.setup(use_gpu=args.use_gpu)
+        #load_checkpoint(experiment, args.eval_epoch)
+        #outdir = os.path.join(experiment.expdir, "results%03d" % args.eval_epoch)
+        #test_list(experiment, outdir, listfile_test, pad=18)
     else:
         from experiment_utility import trainloop
         from dataloader import PreprocessingInt as Preprocessing
@@ -185,8 +185,8 @@ if __name__ == '__main__':
     parser.add_argument('--sgd.lr', type=float, default=0.001)
 
     # Eval mode
-    parser.add_argument('--eval', action='store_false')
-    parser.add_argument('--weights', action='store_false')
+    parser.add_argument('--eval', default=False) # action='store_false')
+    parser.add_argument('--weights', default=False) # action='store_false')
     parser.add_argument('--eval_epoch', type=int)
 
     # Training options
@@ -197,11 +197,11 @@ if __name__ == '__main__':
 
     # Misc
     utils.add_commandline_flag(parser, "--use_gpu", "--use_cpu", True)
-    parser.add_argument("--exp_name"   , default=None)
+    parser.add_argument("--exp_name", default=None)
 
     # base experiment dir
     base_expdir = "/home/niklas/Documents/CNNlight_Experiments"
     parser.add_argument("--exp_basedir", default=base_expdir)
     parser.add_argument("--trainsetiters", type=int, default=100) # original: 640
     args = parser.parse_args()
-    main_sync_sar(args)
+    main_sar(args)
