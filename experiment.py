@@ -205,3 +205,6 @@ if __name__ == '__main__':
     parser.add_argument("--trainsetiters", type=int, default=100) # original: 640
     args = parser.parse_args()
     main_sar(args)
+
+# execute on command line to access tensorboard interface
+# tensorboard --logir=runs
