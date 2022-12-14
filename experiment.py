@@ -147,7 +147,7 @@ def main_sync_sar(args):
         test_list(experiment, outdir, listfile_test, pad=18)
     else:
         from experiment_utility import trainloop
-        from dataloader import PreprocessingIntNoiseToLogBatch as Preprocessing
+        from dataloader import PreprocessingInt as Preprocessing
         from dataloader import create_train_realsar_dataloaders as create_train_dataloaders
         from dataloader import create_valid_realsar_dataloaders as create_valid_dataloaders
 
@@ -202,6 +202,6 @@ if __name__ == '__main__':
     # base experiment dir
     base_expdir = "/home/niklas/Documents/CNNlight_Experiments"
     parser.add_argument("--exp_basedir", default=base_expdir)
-    parser.add_argument("--trainsetiters", type=int, default=640)
+    parser.add_argument("--trainsetiters", type=int, default=100) # original: 640
     args = parser.parse_args()
     main_sync_sar(args)

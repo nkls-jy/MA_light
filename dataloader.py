@@ -42,21 +42,12 @@ def create_valid_realsar_dataloaders(patchsize, batchsize):
 
     return validloader
 
-class PreprocessingIntNoiseToLogBatch:
-    def __init__(self):
-        from torch.distributions.gamma import Gamma
-        #self.gen_dist = Gamma(torch.tensor([1.0]), torch.tensor([1.0]))
-        self.flag_bayes = False # testing, usually taken from args, flag_bayes
+class PreprocessingInt:
     def __call__(self, batch):
         #print(f'preprocessing input: {batch.shape}')
         
         tl = torch.split(batch, 1, dim=1)
-        noisy_int = tl[0]
-        target_int = tl[1]
-
-        # convert noisy amplitude to log
-        noisy = noisy_int.log()
-        target = target_int.log()
+        noisy = tl[0]
         target = tl[1]
 
         #print(f'noisy shape: {noisy.shape}')
