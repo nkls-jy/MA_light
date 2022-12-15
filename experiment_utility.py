@@ -9,6 +9,7 @@ import os
 from utils import metrics
 from tqdm import tqdm
 import time
+import rasterio
 
 def save_checkpoint(experiment):
     # Save checkpoint
@@ -205,7 +206,7 @@ def test_epoch(experiment, testloader, data_preprocessing, log_data):
             batch_loss = experiment.criterion(pred, target)
 
             loss = batch_loss.mean()
-            
+
             pred_amp = experiment.postprocessing_net2amp(pred)
 
             stats_one = dict()
@@ -241,22 +242,29 @@ def trainloop(experiment, trainloader, data_preprocessing, log_data, validloader
 
 def test_list(experiment, outdir, listfile, pad=0):
     net = experiment.net
-    eval_file = os.path.join(outdir, "result_%s.mat")
+    # old
+    #eval_file = os.path.join(outdir, "result_%s.mat")
+    # new:
+    eval_file = os.path.join(outdir, "result_%s.tif")
     os.makedirs(outdir, exist_ok=True)
     use_cuda = experiment.use_cuda
 
     net.eval()
-    from scipy.io import loadmat, savemat
+    #from scipy.io import loadmat, savemat
     stats_num = {"mse": 0.0, "psnr": 0.0, "ssim": 0.0}
     stats_cum = {"mse": 0, "psnr": 0, "ssim": 0}
     vetTIME = list()
     with torch.no_grad():
-        for name, filename in listfile:
-            dat = loadmat(filename)
-            output_filename = eval_file % name
+        for filename in listfile:
+            with rasterio.open(filename) as f:
+                img = f.read()
+                outending = filename.rsplit('/', 1)[1]
+            
+            output_filename = eval_file % outending
 
-            print(' %7s |' % name, end='')
-            noisy_int  = dat['noisy_int']
+            #print(' %7s |' % name, end='')
+            noisy_int  = img # if test data is only 1 band noisy image
+            
             timestamp = time.time()
             noisy_int = torch.from_numpy(noisy_int)[None, None, :, :]
             if use_cuda:
