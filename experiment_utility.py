@@ -264,8 +264,8 @@ def test_list(experiment, outdir, listfile, pad=0):
             output_filename = eval_file % outending
 
             #print(' %7s |' % name, end='')
-            noisy_int  = img # if test data is only 1 band noisy image
-            
+            noisy_int  = img[:, 0:1, :, :]
+
             timestamp = time.time()
             noisy_int = torch.from_numpy(noisy_int)[None, None, :, :]
             if use_cuda:
