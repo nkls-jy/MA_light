@@ -178,7 +178,7 @@ if __name__ == '__main__':
     parser.add_argument("--adam.beta2", type=float, default=0.999)
     parser.add_argument("--adam.eps", type=float, default=1e-8)
     parser.add_argument("--adam.weightdecay", type=float, default=1e-4)
-    parser.add_argument('--adam.lr', type=float, default=0.1) # original=0.001
+    parser.add_argument('--adam.lr', type=float, default=0.01) # original=0.001
     # parameters for SGD
     parser.add_argument("--sgd.momentum", type=float, default=0.9)
     parser.add_argument("--sgd.weightdecay", type=float, default=1e-4)
