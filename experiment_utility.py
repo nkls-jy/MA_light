@@ -70,6 +70,7 @@ def train_epoch(experiment, trainloader, data_preprocessing, log_data):
     stats_num = {"loss": 0, "mse": 0, "psnr": 0, "ssim": 0}
     stats_cum = {"loss": 0, "mse": 0, "psnr": 0, "ssim": 0}
 
+    print("Training ")
     for inputs in tqdm(trainloader):
         if experiment.use_cuda:
             inputs = inputs.cuda()
