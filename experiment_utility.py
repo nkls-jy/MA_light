@@ -277,7 +277,6 @@ def test_list(experiment, outdir, listfile, pad=0):
             pred = net(noisy)
 
 
-
             pred_int = experiment.postprocessing_net2int(pred)[0, 0, :, :]
             if use_cuda:
                 pred_int = pred_int.cpu()
