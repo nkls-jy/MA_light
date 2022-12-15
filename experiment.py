@@ -157,8 +157,8 @@ def main_sar(args):
         experiment.setup(args, use_gpu=args.use_gpu)
         # load training data 
         trainloader = create_train_dataloaders(patchsize, args.batchsize, args.trainsetiters)
-        #validloader = create_valid_dataloaders(args.patchsizevalid, args.batchsizevalid)
-        trainloop(experiment, trainloader, Preprocessing(), log_data=False, validloader=None)
+        validloader = create_valid_dataloaders(args.patchsizevalid, args.batchsizevalid)
+        trainloop(experiment, trainloader, Preprocessing(), log_data=False, validloader=validloader)
         #trainloop(experiment, trainloader, Preprocessing(), log_data=False, validloader=validloader)
 
 if __name__ == '__main__':
@@ -193,7 +193,7 @@ if __name__ == '__main__':
     parser.add_argument("--batchsize"     , type=int, default= 32)
     parser.add_argument("--patchsize"     , type=int, default=48)
     parser.add_argument("--batchsizevalid", type=int, default=8)
-    parser.add_argument("--patchsizevalid", type=int, default=256)
+    parser.add_argument("--patchsizevalid", type=int, default=48) # original: default=256) but currently no big valid patches available
 
     # Misc
     utils.add_commandline_flag(parser, "--use_gpu", "--use_cpu", True)

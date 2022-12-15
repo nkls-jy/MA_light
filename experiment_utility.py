@@ -175,18 +175,25 @@ def test_epoch(experiment, testloader, data_preprocessing, log_data):
                 noisy = experiment.preprocessing_log2net(noisy_log)
                 target = experiment.preprocessing_log2net(target_log)
                 target_amp = target_log.exp()
+                del noisy_log
+                del target_log
             else:
                 noisy_int, target_int = data_preprocessing(inputs)
                 noisy = experiment.preprocessing_int2net(noisy_int)
                 target = experiment.preprocessing_int2net(target_int)
                 target_amp = target_int.abs().sqrt()
+                del noisy_int
+                del target_int
 
             noisy  = torch.autograd.Variable(noisy , requires_grad=False)
             target = torch.autograd.Variable(target, requires_grad=False)
+            
+            # prediction
             pred = experiment.net(noisy)
 
             pad_row = (target.shape[2] - pred.shape[2])//2
             pad_col = (target.shape[3] - pred.shape[3])//2
+
             if pad_row > 0:
                 target = target[:, :, pad_row: -pad_row, :]
                 target_amp = target_amp[:, :, pad_row: -pad_row, :]
@@ -198,6 +205,7 @@ def test_epoch(experiment, testloader, data_preprocessing, log_data):
             batch_loss = experiment.criterion(pred, target)
 
             loss = batch_loss.mean()
+            
             pred_amp = experiment.postprocessing_net2amp(pred)
 
             stats_one = dict()
