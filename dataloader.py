@@ -14,8 +14,10 @@ from torchvision.transforms import Compose
 #valid_path = ""
 
 # paths for uni machine
-train_path = "/home/niklas/Documents/train_data"
+train_path = "/home/niklas/Documents/traindata_big"
+#valid_path = "/home/niklas/Documents/validata_big"
 valid_path = "/home/niklas/Documents/valid_data"
+
 
 def create_train_realsar_dataloaders(patchsize, batchsize, trainsetiters):
     transform_train = Compose([

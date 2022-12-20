@@ -198,7 +198,7 @@ if __name__ == '__main__':
 
     # Misc
     utils.add_commandline_flag(parser, "--use_gpu", "--use_cpu", True)
-    parser.add_argument("--exp_name", default='exp0001') #default=None)
+    parser.add_argument("--exp_name", default=None)#'exp0001') #default=None)
 
     # base experiment dir
     base_expdir = "/home/niklas/Documents/CNNlight_Experiments"
