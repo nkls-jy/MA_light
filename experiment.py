@@ -137,14 +137,15 @@ def main_sar(args):
         #test_list_weights(experiment, outdir, listfile_test, pad=18)
     elif args.eval:
         from experiment_utility import load_checkpoint, test_list
+        from dataset.folders_data import list_testfiles
         #from dataset.folders_data import list_test_10synt as listfile_test
 
-        #assert(args.exp_name is not None)
-        #experiment = Experiment(exp_basedir, args.exp_name)
-        #experiment.setup(use_gpu=args.use_gpu)
-        #load_checkpoint(experiment, args.eval_epoch)
-        #outdir = os.path.join(experiment.expdir, "results%03d" % args.eval_epoch)
-        #test_list(experiment, outdir, listfile_test, pad=18)
+        assert(args.exp_name is not None)
+        experiment = Experiment(exp_basedir, args.exp_name)
+        experiment.setup(use_gpu=args.use_gpu)
+        load_checkpoint(experiment, args.eval_epoch)
+        outdir = os.path.join(experiment.expdir, "results%03d" % args.eval_epoch)
+        test_list(experiment, outdir, list_testfiles, pad=18)
     else:
         from experiment_utility import trainloop
         from dataloader import PreprocessingInt as Preprocessing
@@ -158,7 +159,7 @@ def main_sar(args):
         # load training data 
         trainloader = create_train_dataloaders(patchsize, args.batchsize, args.trainsetiters)
         validloader = create_valid_dataloaders(args.patchsizevalid, args.batchsizevalid)
-        trainloop(experiment, trainloader, Preprocessing(), log_data=False, validloader=validloader)
+        trainloop(experiment, trainloader, Preprocessing(), log_data=False, validloader=None)#validloader)
         #trainloop(experiment, trainloader, Preprocessing(), log_data=False, validloader=validloader)
 
 if __name__ == '__main__':
@@ -185,9 +186,9 @@ if __name__ == '__main__':
     parser.add_argument('--sgd.lr', type=float, default=0.001)
 
     # Eval mode
-    parser.add_argument('--eval', default=False) # action='store_false')
+    parser.add_argument('--eval', default=False)#True) # action='store_false')
     parser.add_argument('--weights', default=False) # action='store_false')
-    parser.add_argument('--eval_epoch', type=int)
+    parser.add_argument('--eval_epoch', type=int, default=50)
 
     # Training options
     parser.add_argument("--batchsize"     , type=int, default= 32)
@@ -197,7 +198,7 @@ if __name__ == '__main__':
 
     # Misc
     utils.add_commandline_flag(parser, "--use_gpu", "--use_cpu", True)
-    parser.add_argument("--exp_name", default=None)
+    parser.add_argument("--exp_name", default='exp0001') #default=None)
 
     # base experiment dir
     base_expdir = "/home/niklas/Documents/CNNlight_Experiments"

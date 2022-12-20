@@ -10,6 +10,7 @@ from utils import metrics
 from tqdm import tqdm
 import time
 import rasterio
+import numpy as np
 
 def save_checkpoint(experiment):
     # Save checkpoint
@@ -246,7 +247,7 @@ def test_list(experiment, outdir, listfile, pad=0):
     # old
     #eval_file = os.path.join(outdir, "result_%s.mat")
     # new:
-    eval_file = os.path.join(outdir, "result_%s.tif")
+    eval_file = os.path.join(outdir, "result_%s") # not needed because of out writer: .tif")
     os.makedirs(outdir, exist_ok=True)
     use_cuda = experiment.use_cuda
 
@@ -255,19 +256,31 @@ def test_list(experiment, outdir, listfile, pad=0):
     stats_num = {"mse": 0.0, "psnr": 0.0, "ssim": 0.0}
     stats_cum = {"mse": 0, "psnr": 0, "ssim": 0}
     vetTIME = list()
+
+    print(f"testfiles: {listfile}")
+
     with torch.no_grad():
         for filename in listfile:
             with rasterio.open(filename) as f:
                 img = f.read()
+                # args for output 
+                kwargs = f.meta
+
                 outending = filename.rsplit('/', 1)[1]
             
             output_filename = eval_file % outending
 
             #print(' %7s |' % name, end='')
-            noisy_int  = img[:, 0:1, :, :]
+            print(f"img shape: {img.shape}")
+            #noisy_int  = img[:, 0:1, :, :]
+            noisy_int = img
 
             timestamp = time.time()
-            noisy_int = torch.from_numpy(noisy_int)[None, None, :, :]
+
+            noisy_int = torch.from_numpy(noisy_int)[None, :, :]
+            #noisy_int = torch.from_numpy(noisy_int)[None, None, :, :]
+            #print(f"noisy_int shape: {noisy_int.shape}")
+
             if use_cuda:
                 noisy_int = noisy_int.cuda()
             if pad>0:
@@ -275,18 +288,47 @@ def test_list(experiment, outdir, listfile, pad=0):
 
             noisy = experiment.preprocessing_int2net(noisy_int)
             pred = net(noisy)
-
-
+            
+            
             pred_int = experiment.postprocessing_net2int(pred)[0, 0, :, :]
             if use_cuda:
                 pred_int = pred_int.cpu()
             vetTIME.append(time.time()-timestamp)
 
-            datout = dict()
-            datout['output_int'] = pred_int.numpy()
-            datout['norm_int'  ] = dat['norm_int']
-            savemat(output_filename, datout)
+            # create two band output array 
+            pred_img = pred_int.numpy()[np.newaxis, :, :]
+            img = np.squeeze(img)[np.newaxis, :, :]
+            print(f"pred shape: {pred_img.shape}")
+            print(f"orig. shape: {img.shape}")
 
+            #pad_row = (img.shape[0] - pred_img.shape[0]) // 2
+            pad_row = (pred_img.shape[1] - img.shape[1]) // 2
+            #pad_col = (img.shape[1] - pred_img.shape[1]) // 2
+            pad_col = (pred_img.shape[2] - img.shape[2]) // 2
+
+            print(f"pad row: {pad_row}")
+            print(f"pad_col: {pad_col}")
+            if pad_row > 0:
+                pred_img = pred_img[:, pad_row: -pad_row, :]
+            if pad_col > 0:
+                pred_img = pred_img[:, :, pad_col: -pad_col]      
+            
+            print(f"row & col values now: {pred_img.shape}")
+        
+            outfile = np.append(pred_img, img, axis=0)
+            print(f"outfile shape: {outfile.shape}")
+
+            # write output file (TIFF)
+            kwargs.update(
+                dtype=rasterio.float32,
+                count=2,
+                compress='lzw')
+
+            with rasterio.open(output_filename, 'w', **kwargs) as dst:
+                dst.write(outfile.astype(rasterio.float32))
+                #dst.write_band(1, ndvi.astype(rasterio.float32))
+
+            '''
             target_int = torch.from_numpy(dat['target_int'])[None, None, :, :]
             target_amp = target_int.abs().sqrt()
             #mask = torch.from_numpy(dat['mask'])[None, None, :, :]
@@ -331,7 +373,7 @@ def test_list(experiment, outdir, listfile, pad=0):
         print(' %5s: %.5f | ' % (stats_key, stats_value), end='')
     print("")
     savemat(os.path.join(outdir, "info.mat"), {'vetTIME':vetTIME})
-
+    '''
 def test_list_weights(experiment, outdir, listfile, pad=0):
     net = experiment.net
     eval_file = os.path.join(outdir, "weights_%s.mat")
