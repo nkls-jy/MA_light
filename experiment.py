@@ -143,7 +143,8 @@ def main_sar(args):
         assert(args.exp_name is not None)
         experiment = Experiment(exp_basedir, args.exp_name)
         experiment.setup(use_gpu=args.use_gpu)
-        load_checkpoint(experiment, args.eval_epoch)
+        load_checkpoint(experiment, 29)
+        #load_checkpoint(experiment, args.eval_epoch)
         outdir = os.path.join(experiment.expdir, "results%03d" % args.eval_epoch)
         test_list(experiment, outdir, list_testfiles, pad=18)
     else:
@@ -186,7 +187,7 @@ if __name__ == '__main__':
     parser.add_argument('--sgd.lr', type=float, default=0.001)
 
     # Eval mode
-    parser.add_argument('--eval', default=False)#True) # action='store_false')
+    parser.add_argument('--eval', default=True) #False) # action='store_false')
     parser.add_argument('--weights', default=False) # action='store_false')
     parser.add_argument('--eval_epoch', type=int, default=50)
 
@@ -198,7 +199,7 @@ if __name__ == '__main__':
 
     # Misc
     utils.add_commandline_flag(parser, "--use_gpu", "--use_cpu", True)
-    parser.add_argument("--exp_name", default=None)#'exp0001') #default=None)
+    parser.add_argument("--exp_name", default='exp0003') #None)#'exp0001') #default=None)
 
     # base experiment dir
     base_expdir = "/home/niklas/Documents/CNNlight_Experiments"

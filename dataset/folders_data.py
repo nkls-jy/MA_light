@@ -6,7 +6,8 @@ test_dir = "./sets/valid/"
 import os
 
 # test file paths
-test_path = "/home/niklas/Documents/test_data_noisy"
+#test_path = "/home/niklas/Documents/test_data_noisy"
+test_path = "/home/niklas/Documents/testdata_big_noisy"
 
 # create list
 #list_testfiles = [f for f in os.listdir(test_path) if os.path.isfile(os.path.join(test_path, f)) and f.endswith(".tif")]
