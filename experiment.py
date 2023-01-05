@@ -27,7 +27,9 @@ class Experiment:
                                             sizearea=sizearea, 
                                             bn_momentum=0.1, 
                                             padding=False)
+        
         net = NlmCNN.NlmCNN(network_weights, sizearea=sizearea, sar_data = True, padding=False)
+        
         return net
 
     def preprocessing_int2net(self, img):
@@ -143,8 +145,7 @@ def main_sar(args):
         assert(args.exp_name is not None)
         experiment = Experiment(exp_basedir, args.exp_name)
         experiment.setup(use_gpu=args.use_gpu)
-        load_checkpoint(experiment, 29)
-        #load_checkpoint(experiment, args.eval_epoch)
+        load_checkpoint(experiment, args.eval_epoch)
         outdir = os.path.join(experiment.expdir, "results%03d" % args.eval_epoch)
         test_list(experiment, outdir, list_testfiles, pad=18)
     else:
@@ -171,7 +172,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='NLMCNN for SAR image denoising')
     parser.add_argument("--backnet", type=int, default=0)
-    parser.add_argument("--sizearea", type=int, default=50) #default=25)
+    parser.add_argument("--sizearea", type=int, default=25) #default=31) #default=25)
 
     # Optimizer
     parser.add_argument('--optimizer', default="adam", choices=["adam", "sgd"]) # which optimizer to use
@@ -187,24 +188,24 @@ if __name__ == '__main__':
     parser.add_argument('--sgd.lr', type=float, default=0.001)
 
     # Eval mode
-    parser.add_argument('--eval', default=False) #False) # action='store_false')
+    parser.add_argument('--eval', default=True) #False) # action='store_false')
     parser.add_argument('--weights', default=False) # action='store_false')
     parser.add_argument('--eval_epoch', type=int, default=50)
 
     # Training options
     parser.add_argument("--batchsize"     , type=int, default= 32)
-    parser.add_argument("--patchsize"     , type=int, default=98)#default=48)
+    parser.add_argument("--patchsize"     , type=int, default=48)# 60)#default=48)
     parser.add_argument("--batchsizevalid", type=int, default=8)
     parser.add_argument("--patchsizevalid", type=int, default=48) # original: default=256) but currently no big valid patches available
 
     # Misc
     utils.add_commandline_flag(parser, "--use_gpu", "--use_cpu", True)
-    parser.add_argument("--exp_name", default='exp0003') #None)#'exp0001') #default=None)
+    parser.add_argument("--exp_name", default='exp0001') #None)#'exp0001') #default=None)
 
     # base experiment dir
     base_expdir = "/home/niklas/Documents/CNNlight_Experiments"
     parser.add_argument("--exp_basedir", default=base_expdir)
-    parser.add_argument("--trainsetiters", type=int, default=100) # original: 640
+    parser.add_argument("--trainsetiters", type=int, default=300) # original: 640
     args = parser.parse_args()
     main_sar(args)
 

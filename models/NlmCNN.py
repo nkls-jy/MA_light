@@ -14,17 +14,37 @@ def mul_weights_patches(x, w, kernel, stride=1, padding=False):
         pad_col = -(x.shape[3] - kernel) % stride
         x = F.pad(x, (pad_col // 2, pad_col - pad_col // 2, pad_row // 2, pad_row - pad_row // 2))
 
+    #print(f"initial x shape: {x.shape}")
+    #print(f"initial w shape: {w.shape}")
+
+
     # Extract patches
     w = w.permute(0, 2, 3, 1)
+    #print(f"w after permute: {w.shape}")
     w = w.view(w.shape[0], 1, w.shape[1], w.shape[2], kernel, kernel)
-    patches = x.unfold(2, kernel, stride).unfold(3, kernel, stride)
+    #print(f"w after view: {w.shape}")
+    
+    #patches = x.unfold(2, kernel, stride).unfold(3, kernel, stride)
+    patches = x.unfold(2, kernel, stride)
+    #print(f"new w (= patches) after 1st unfold: {patches.shape}")
+    patches = patches.unfold(3, kernel, stride)
+    #print(f"new patches after 2nd unfold: {patches.shape}")
 
     pad_row = (w.shape[2] - patches.shape[2])//2
     pad_col = (w.shape[3] - patches.shape[3])//2
+
+    #print(f"patches shape: {patches.shape}")
+    #print(f"w shape: {w.shape}")
+    #print(f"pad_row: {pad_row}")
+    #print(f"pad_col: {pad_col}")
+
     if (pad_row<0) or (pad_col<0):
         patches = patches[:,:,max(-pad_row,0):(patches.shape[2] - max(-pad_row,0)), max(-pad_col,0):(patches.shape[3] - max(-pad_col,0)),:,:]
     if (pad_row>0) or (pad_col>0):
         w = w[:,:,max(pad_row,0):(w.shape[2] - max(pad_row,0)), max(pad_col,0):(w.shape[3] - max(pad_col,0)),:,:]
+
+    #print(f"AFTER: patches shape: {patches.shape}")
+    #print(f"AFTER: w shape: {w.shape}")
 
     y = (patches * w).sum((4,5))
 
@@ -47,11 +67,20 @@ class NlmCNN(nn.Module):
         self.sar_data = sar_data
 
     def forward_weights(self, x, reshape=False):
+        #print(f"sar_data: {self.sar_data}")
+        #print(f"x shape: {x.shape}")
+
         if self.sar_data:
             x_in = x.abs().log() / 2.0
         else:
             x_in = x
+
+        #print(f"x_in shape: {x_in.shape}")
+        #print(f"############\nx_in shape: {x_in.shape}\n###########")
         w = self.network_weights(x_in)
+
+        #print(f"w shape: {w.shape}")
+
         if reshape:
             w = w.permute(0, 2, 3, 1)
             w = w.view(w.shape[0], w.shape[1], w.shape[2], self.sizearea, self.sizearea)
@@ -61,6 +90,8 @@ class NlmCNN(nn.Module):
 
     def forward(self, x):
         w = self.forward_weights(x)
+        #print(f"weight (w) shape: {w.shape}")
+        #print(f"input (x) shape: {x.shape}")
         y = mul_weights_patches(x, w, self.sizearea, stride=1, padding=self.padding)
         return y
 
@@ -122,6 +153,8 @@ def make_backnet(nplanes_in, type, sizearea, bn_momentum=0.1, n3block_opt={}, pa
     if type == 0:
         depth = 12
         features = [ 169, 225, 289, 361, 441, 529, 625, 729, 841, 961, 1089, sizearea*sizearea]
+        # for bigger sizearea (= 30)
+        #features = [256, 324, 400, 484, 576, 676, 784, 900, 1024, 1156, 1296, sizearea*sizearea]
         kernels  = [5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
         dilats   = [1, ] * depth
         acts     = ['leaky_relu', ] * (depth-1) + ['softmax', ]
