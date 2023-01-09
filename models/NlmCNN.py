@@ -89,6 +89,7 @@ class NlmCNN(nn.Module):
             return w
 
     def forward(self, x):
+
         w = self.forward_weights(x)
         #print(f"weight (w) shape: {w.shape}")
         #print(f"input (x) shape: {x.shape}")
@@ -155,7 +156,8 @@ def make_backnet(nplanes_in, type, sizearea, bn_momentum=0.1, n3block_opt={}, pa
         features = [ 169, 225, 289, 361, 441, 529, 625, 729, 841, 961, 1089, sizearea*sizearea]
         # for bigger sizearea (= 30)
         #features = [256, 324, 400, 484, 576, 676, 784, 900, 1024, 1156, 1296, sizearea*sizearea]
-        kernels  = [5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
+        #kernels  = [5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
+        kernels  = [7, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1]
         dilats   = [1, ] * depth
         acts     = ['leaky_relu', ] * (depth-1) + ['softmax', ]
         bns      = [False, ] + [True,]*(depth-2) + [False, ]

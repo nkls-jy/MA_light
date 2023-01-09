@@ -67,7 +67,9 @@ def make_net(nplanes_in, kernels, features, bns, acts, dilats, bn_momentum = 0.1
 
         elem = conv_with_padding(in_feats, features[i], kernelsize=kernels[i], dilation=dilats[i], padding=padding, bias=not(bns[i]))
         conv_init(elem, act=acts[i])
-        print(f"elem weight shape: {elem.weight.shape}")
+        #print(f"elem padding: {elem.padding}")
+        #print(f"elem in_channels: {elem.in_channels}")
+        #print(f"elem weight shape: {elem.weight.shape}")
         layers.append(elem)
 
         if bns[i]:

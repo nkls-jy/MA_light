@@ -92,7 +92,7 @@ def train_epoch(experiment, trainloader, data_preprocessing, log_data):
             target_amp = target_int.abs().sqrt()
             del noisy_int
             del target_int
-
+        
         pred = experiment.net(noisy)
         
         #print(f"pred shape: {pred.shape}")
@@ -310,8 +310,14 @@ def test_list(experiment, outdir, listfile, pad=0):
             print(f"pad_col: {pad_col}")
             if pad_row > 0:
                 pred_img = pred_img[:, pad_row: -pad_row, :]
+            elif pad_row < 0:
+                pad_row = -pad_row
+                img = img[:, pad_row: -pad_row, :]
             if pad_col > 0:
-                pred_img = pred_img[:, :, pad_col: -pad_col]      
+                pred_img = pred_img[:, :, pad_col: -pad_col]
+            elif pad_col < 0:
+                pad_col = -pad_col
+                img = img[:, :, pad_col: -pad_col]
             
             print(f"row & col values now: {pred_img.shape}")
         

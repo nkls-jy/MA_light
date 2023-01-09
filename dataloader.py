@@ -14,7 +14,8 @@ from torchvision.transforms import Compose
 #valid_path = ""
 
 # paths for uni machine
-train_path = "/home/niklas/Documents/traindata_big"
+#train_path = "/home/niklas/Documents/traindata_big"
+train_path = "/home/niklas/Documents/traindata_small"
 #valid_path = "/home/niklas/Documents/validata_big"
 valid_path = "/home/niklas/Documents/valid_data"
 
